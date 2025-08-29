@@ -1,3 +1,5 @@
+import Home from './Home';
+
 export const App = () => {
-	return <div>Nexus Tracker</div>;
+	return <Home />;
 };
