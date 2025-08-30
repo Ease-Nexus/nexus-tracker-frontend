@@ -2,12 +2,11 @@
 	"$schema": "https://biomejs.dev/schemas/2.2.2/schema.json",
 	"vcs": {
 		"enabled": false,
-		"clientKind": "git",
-		"useIgnoreFile": false
+		"clientKind": "git"
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!src/ui/components"]
+		"includes": ["**", "!src/components/ui"]
 	},
 	"formatter": {
 		"enabled": true,
@@ -16,7 +15,21 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true
+			"recommended": true,
+			"correctness": {
+				"noUnusedImports": {
+					"options": {},
+					"level": "error",
+					"fix": "safe"
+				}
+			},
+			"suspicious": {
+				"noArrayIndexKey": "off",
+				"noUnknownAtRules": "off"
+			},
+			"a11y": {
+				"noStaticElementInteractions": "off"
+			}
 		}
 	},
 	"javascript": {

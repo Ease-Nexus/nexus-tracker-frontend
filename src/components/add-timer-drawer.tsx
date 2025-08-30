@@ -1,6 +1,6 @@
 import { X } from 'lucide-react';
 import type React from 'react';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,12 +26,15 @@ export function AddTimerDrawer({
 		{ label: '2 horas', value: 120 },
 	];
 
+	const badgeId = useId();
+	const customTimer = useId();
+
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 
 		if (!badgeNumber.trim()) return;
 
-		const minutes = selectedPreset || Number.parseInt(customMinutes) || 0;
+		const minutes = selectedPreset || Number.parseInt(customMinutes, 10) || 0;
 		if (minutes <= 0) return;
 
 		onAddTimer(badgeNumber.trim(), minutes);
@@ -57,7 +60,11 @@ export function AddTimerDrawer({
 	return (
 		<>
 			{/* Overlay */}
-			<div className="fixed inset-0 bg-black/50 z-40" onClick={onClose} />
+			<div
+				className="fixed inset-0 bg-black/50 z-40"
+				onClick={onClose}
+				onKeyUp={onClose}
+			/>
 
 			{/* Drawer */}
 			<div className="fixed right-0 top-0 h-full w-80 bg-card border-l border-border z-50 shadow-lg">
@@ -85,7 +92,7 @@ export function AddTimerDrawer({
 								Número do Crachá
 							</Label>
 							<Input
-								id="badge"
+								id={badgeId}
 								type="text"
 								placeholder="Ex: 001, A15, etc."
 								value={badgeNumber}
@@ -120,7 +127,7 @@ export function AddTimerDrawer({
 								Tempo Personalizado (minutos)
 							</Label>
 							<Input
-								id="custom"
+								id={customTimer}
 								type="number"
 								placeholder="Ex: 45, 90, etc."
 								value={customMinutes}
