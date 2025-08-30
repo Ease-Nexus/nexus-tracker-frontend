@@ -6,11 +6,13 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!src/components/ui", "!src/routeTree.gen.ts"]
+		"includes": ["**", "!src/components/ui", "!src/route-tree.gen.ts"]
 	},
 	"formatter": {
 		"enabled": true,
-		"indentStyle": "tab"
+		"indentStyle": "space",
+		"lineWidth": 80,
+		"indentWidth": 2
 	},
 	"linter": {
 		"enabled": true,
@@ -29,6 +31,16 @@
 			},
 			"a11y": {
 				"noStaticElementInteractions": "off"
+			},
+			"style": {
+				"useFilenamingConvention": {
+					"level": "error",
+					"options": {
+						"strictCase": true,
+						"requireAscii": true,
+						"filenameCases": ["kebab-case"]
+					}
+				}
 			}
 		}
 	},
