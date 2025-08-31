@@ -226,14 +226,29 @@ export function useTimerManager() {
 
   const getTimerStats = useCallback(() => {
     const activeTimers = timers.filter((t) => t.status === 'running').length;
-    const totalTimers = timers.length;
+    const pausedTimers = timers.filter((t) => t.status === 'paused').length;
+    const stoppedTimers = timers.filter(
+      (t) => t.status === 'stopped' && t.remainingTime > 0,
+    ).length;
     const completedTimers = timers.filter((t) => t.remainingTime === 0).length;
+    const totalTimers = timers.length;
+
+    const totalTimeMinutes = timers.reduce(
+      (sum, timer) => sum + timer.totalMinutes,
+      0,
+    );
+    const totalTimeHours = Math.round((totalTimeMinutes / 60) * 10) / 10; // Round to 1 decimal
+    const averageTime =
+      totalTimers > 0 ? Math.round(totalTimeMinutes / totalTimers) : 0;
 
     return {
       active: activeTimers,
-      total: totalTimers,
+      paused: pausedTimers,
+      stopped: stoppedTimers,
       completed: completedTimers,
-      paused: timers.filter((t) => t.status === 'paused').length,
+      total: totalTimers,
+      totalTimeHours,
+      averageTime,
     };
   }, [timers]);
 
