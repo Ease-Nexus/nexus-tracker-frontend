@@ -1,6 +1,5 @@
 import { Icon } from '@iconify/react';
-import { Link } from '@tanstack/react-router';
-import { Clock, FileText } from 'lucide-react';
+import { Link, type LinkProps } from '@tanstack/react-router';
 import {
   Sidebar,
   SidebarContent,
@@ -15,7 +14,26 @@ import {
 } from '@/components/ui/sidebar';
 import { ModeToggle } from '@/providers/theme-provider';
 
-export function AppSidebar() {
+interface MenuItem {
+  title: string;
+  icon: string;
+  to: LinkProps['to'];
+}
+
+export const AppSidebar = () => {
+  const menuItems: MenuItem[] = [
+    {
+      icon: 'basil:clock-outline',
+      title: 'Dashboard',
+      to: '/',
+    },
+    {
+      icon: 'bx:file',
+      title: 'Relatórios',
+      to: '/reports',
+    },
+  ];
+
   return (
     <Sidebar variant="floating" collapsible="icon">
       <SidebarHeader>
@@ -38,20 +56,16 @@ export function AppSidebar() {
           <SidebarGroupLabel>Home</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to="/">
-                    <Clock />
-                    Dashboard
-                  </Link>
-                </SidebarMenuButton>
-                <SidebarMenuButton asChild>
-                  <Link to="/reports">
-                    <FileText />
-                    Relatórios
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {menuItems.map((item, index) => (
+                <SidebarMenuItem key={`${item.title}-${index}`}>
+                  <SidebarMenuButton asChild>
+                    <Link to={item.to}>
+                      <Icon icon={item.icon} />
+                      {item.title}
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -64,6 +78,6 @@ export function AppSidebar() {
       </SidebarFooter>
     </Sidebar>
   );
-}
+};
 
 export default AppSidebar;
