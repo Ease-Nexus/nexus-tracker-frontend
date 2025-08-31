@@ -1,12 +1,12 @@
 import { Clock, FileText, Play, Plus } from 'lucide-react';
 import { useState } from 'react';
-import { ReportsScreen } from '@/components/reports-screen';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTimerManager } from '@/hooks/use-timer-manager';
 import { AddTimerDrawer } from '@/pages/components/add-timer-drawer';
-import { Dashboard } from './components/dashboard';
+import { ReportsScreen } from '@/pages/reports';
+import { Dashboard } from '../components/dashboard';
 
 export interface Timer {
   id: string;
