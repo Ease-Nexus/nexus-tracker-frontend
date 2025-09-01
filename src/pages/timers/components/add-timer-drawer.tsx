@@ -123,9 +123,10 @@ export function AddTimerDrawer({ onAddTimer }: AddTimerDrawerProps) {
                               ? 'default'
                               : 'outline'
                           }
-                          onClick={() =>
-                            field.form.setFieldValue('minutes', preset.value)
-                          }
+                          onClick={() => {
+                            field.form.setFieldValue('minutes', preset.value);
+                            field.handleChange(preset.value);
+                          }}
                           className="w-full justify-start"
                         >
                           {preset.label}
