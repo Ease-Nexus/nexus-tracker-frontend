@@ -49,7 +49,7 @@ export function Dashboard({
   );
 
   return (
-    <Tabs className="gap-4">
+    <Tabs className="gap-4" defaultValue="all">
       <TabsList className="">
         <TabsTrigger className="px-4" value="all">
           Todos

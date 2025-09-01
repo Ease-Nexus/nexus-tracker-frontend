@@ -3,12 +3,14 @@
 import { Icon } from '@iconify/react/dist/iconify.js';
 import { Info, Pause, Play, RotateCcw, Square, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { Timer } from '@/types';
 import { TimerDetailsModal } from './details-modal';
+import { Dialog } from './dialog';
 
 interface TimerCardProps {
   timer: Timer;
@@ -60,24 +62,114 @@ export function TimerCard({ timer, onUpdate, onDelete }: TimerCardProps) {
   };
 
   const handleReset = () => {
-    if (
-      confirm(
-        'Tem certeza que deseja resetar este timer? Todo o histórico será perdido.',
-      )
-    ) {
-      onUpdate(timer.id, {
-        remainingTime: timer.totalMinutes * 60,
-        status: 'stopped',
-        history: [],
-      });
-    }
+    onUpdate(timer.id, {
+      remainingTime: timer.totalMinutes * 60,
+      status: 'stopped',
+      history: [],
+    });
+
+    toast.info('Timer restaurado');
   };
 
   const handleDelete = () => {
-    if (confirm('Tem certeza que deseja excluir este timer?')) {
-      onDelete(timer.id);
-    }
+    onDelete(timer.id);
+    toast.info('Timer excluído');
   };
+
+  const playButton = (
+    <Button
+      size="sm"
+      variant={timer.status === 'running' ? 'secondary' : 'default'}
+      onClick={handlePlay}
+      disabled={timer.remainingTime === 0}
+      className="rounded-sm h-6 w-6 p-0 shadow-sm hover:shadow-md transition-all duration-200"
+    >
+      {timer.status === 'running' ? (
+        <Pause className="h-2.5 w-2.5" />
+      ) : (
+        <Play className="h-2.5 w-2.5" />
+      )}
+    </Button>
+  );
+
+  const stopButton = (
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={handleStop}
+      disabled={timer.status === 'stopped'}
+      className="rounded-sm h-6 w-6 p-0 shadow-sm hover:shadow-md transition-all duration-200 bg-transparent"
+    >
+      <Square className="h-2.5 w-2.5" />
+    </Button>
+  );
+
+  const resetButton = (
+    <Dialog
+      dialog={{
+        title: 'Restaurar Timer',
+        description:
+          'Tem certeza que deseja resetar este timer? Todo o histórico será perdido.',
+        actions: {
+          continue: {
+            label: 'Sim',
+            onClick: handleReset,
+          },
+          cancel: {
+            label: 'Não',
+            onClick: () => {},
+          },
+        },
+      }}
+    >
+      <Button
+        size="sm"
+        variant="outline"
+        disabled={timer.status === 'running'}
+        className="rounded-sm h-6 w-6 p-0 shadow-sm hover:shadow-md transition-all duration-200 bg-transparent"
+      >
+        <RotateCcw className="h-2.5 w-2.5" />
+      </Button>
+    </Dialog>
+  );
+
+  const infoButton = (
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={() => setShowDetails(true)}
+      className="rounded-sm h-6 w-6 p-0 shadow-sm hover:shadow-md transition-all duration-200"
+    >
+      <Info className="h-2.5 w-2.5" />
+    </Button>
+  );
+
+  const deleteButton = (
+    <Dialog
+      dialog={{
+        title: 'Excluir Timer',
+        description: 'Tem certeza que deseja excluir este timer?',
+        actions: {
+          continue: {
+            label: 'Sim',
+            onClick: handleDelete,
+          },
+          cancel: {
+            label: 'Não',
+            onClick: () => {},
+          },
+        },
+      }}
+    >
+      <Button
+        size="sm"
+        variant="destructive"
+        className="rounded-sm h-6 w-6 p-0 shadow-sm hover:shadow-md transition-all duration-200"
+      >
+        <Trash2 className="h-2.5 w-2.5" />
+      </Button>
+    </Dialog>
+  );
 
   const progressPercentage =
     ((timer.totalMinutes * 60 - timer.remainingTime) /
@@ -102,57 +194,11 @@ export function TimerCard({ timer, onUpdate, onDelete }: TimerCardProps) {
             </Badge>
 
             <div className="flex items-center gap-1.5">
-              <Button
-                size="sm"
-                variant={timer.status === 'running' ? 'secondary' : 'default'}
-                onClick={handlePlay}
-                disabled={timer.remainingTime === 0}
-                className="rounded-sm h-6 w-6 p-0 shadow-sm hover:shadow-md transition-all duration-200"
-              >
-                {timer.status === 'running' ? (
-                  <Pause className="h-2.5 w-2.5" />
-                ) : (
-                  <Play className="h-2.5 w-2.5" />
-                )}
-              </Button>
-
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleStop}
-                disabled={timer.status === 'stopped'}
-                className="rounded-sm h-6 w-6 p-0 shadow-sm hover:shadow-md transition-all duration-200 bg-transparent"
-              >
-                <Square className="h-2.5 w-2.5" />
-              </Button>
-
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleReset}
-                disabled={timer.status === 'running'}
-                className="rounded-sm h-6 w-6 p-0 shadow-sm hover:shadow-md transition-all duration-200 bg-transparent"
-              >
-                <RotateCcw className="h-2.5 w-2.5" />
-              </Button>
-
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setShowDetails(true)}
-                className="rounded-sm h-6 w-6 p-0 shadow-sm hover:shadow-md transition-all duration-200"
-              >
-                <Info className="h-2.5 w-2.5" />
-              </Button>
-
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={handleDelete}
-                className="rounded-sm h-6 w-6 p-0 shadow-sm hover:shadow-md transition-all duration-200"
-              >
-                <Trash2 className="h-2.5 w-2.5" />
-              </Button>
+              {playButton}
+              {stopButton}
+              {resetButton}
+              {/* {infoButton} */}
+              {deleteButton}
             </div>
           </div>
 
@@ -166,13 +212,15 @@ export function TimerCard({ timer, onUpdate, onDelete }: TimerCardProps) {
               {formatTime(timer.remainingTime)}
             </div>
 
-            {timer.history.length > 0 && (
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                {/* <Users className="h-3 w-3" /> */}
-                <Icon icon="bi:bar-chart-steps" />
-                <span>{timer.history.length}</span>
-              </div>
-            )}
+            {
+              // timer.history.length > 0 && (
+              //   <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              //     {/* <Users className="h-3 w-3" /> */}
+              //     <Icon icon="bi:bar-chart-steps" />
+              //     <span>{timer.history.length}</span>
+              //   </div>
+              // )
+            }
           </div>
 
           <div className="absolute bottom-1 left-3 right-3">
