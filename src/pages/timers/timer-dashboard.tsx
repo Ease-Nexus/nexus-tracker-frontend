@@ -1,6 +1,3 @@
-import { Plus } from 'lucide-react';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { useTimerManager } from '@/hooks/use-timer-manager';
 import { AddTimerDrawer } from '@/pages/timers/components/add-timer-drawer';
 import { Counters } from './components';
@@ -23,13 +20,18 @@ export interface TimerBlock {
 }
 
 export default function TimerDashboard() {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const { timers, isLoaded, addTimer, updateTimer, deleteTimer } =
-    useTimerManager();
+  const {
+    timers,
+    isLoaded,
+    addTimer,
+    updateTimer,
+    deleteTimer,
+    getTimerStats,
+  } = useTimerManager();
 
   const handleAddTimer = (badgeNumber: string, minutes: number) => {
+    console.log(badgeNumber, minutes);
     addTimer(badgeNumber, minutes);
-    setIsDrawerOpen(false);
   };
 
   if (!isLoaded) {
@@ -57,16 +59,10 @@ export default function TimerDashboard() {
                 Pista de Patinação - Controle de Crachás
               </p>
             </div>
-            <Button
-              onClick={() => setIsDrawerOpen(true)}
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Novo Timer
-            </Button>
+            <AddTimerDrawer onAddTimer={handleAddTimer} />
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 w-full">
-            <Counters />
+            <Counters getTimerStats={getTimerStats} />
           </div>
         </div>
       </header>
@@ -75,12 +71,6 @@ export default function TimerDashboard() {
         timers={timers}
         onUpdateTimer={updateTimer}
         onDeleteTimer={deleteTimer}
-      />
-
-      <AddTimerDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onAddTimer={handleAddTimer}
       />
     </div>
   );

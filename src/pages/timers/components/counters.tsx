@@ -1,8 +1,18 @@
 import { CheckCircle, Timer as LucidTimer, Pause, Play, X } from 'lucide-react';
-import { useTimerManager } from '@/hooks/use-timer-manager';
 
-export const Counters = () => {
-  const { getTimerStats } = useTimerManager();
+export const Counters = ({
+  getTimerStats,
+}: {
+  getTimerStats: () => {
+    active: number;
+    paused: number;
+    stopped: number;
+    completed: number;
+    total: number;
+    totalTimeHours: number;
+    averageTime: number;
+  };
+}) => {
   const stats = getTimerStats();
 
   /* Total Timers */

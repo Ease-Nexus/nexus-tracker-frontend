@@ -1,155 +1,173 @@
-import { X } from 'lucide-react';
-import type React from 'react';
+import { useForm } from '@tanstack/react-form';
+import { Plus } from 'lucide-react';
 import { useId, useState } from 'react';
+import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 interface AddTimerDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
   onAddTimer: (badgeNumber: string, minutes: number) => void;
 }
 
-export function AddTimerDrawer({
-  isOpen,
-  onClose,
-  onAddTimer,
-}: AddTimerDrawerProps) {
-  const [badgeNumber, setBadgeNumber] = useState('');
-  const [customMinutes, setCustomMinutes] = useState('');
-  const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
-
+export function AddTimerDrawer({ onAddTimer }: AddTimerDrawerProps) {
+  const [open, setOpen] = useState<boolean>();
   const presetOptions = [
     { label: '30 min', value: 30 },
     { label: '1 hora', value: 60 },
     { label: '2 horas', value: 120 },
   ];
-
-  const badgeId = useId();
   const customTimer = useId();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const form = useForm({
+    validators: {
+      onChange: z.object({
+        badgeNumber: z.string().min(1),
+        minutes: z.number().min(1),
+      }),
+      onMount: z.object({
+        badgeNumber: z.string().min(1),
+        minutes: z.number().min(1),
+      }),
+    },
+    defaultValues: {
+      badgeNumber: '',
+      minutes: 0,
+    },
+    onSubmitInvalid: ({ value }) => {
+      console.log('invalid', { value });
+    },
 
-    if (!badgeNumber.trim()) return;
+    onSubmit: ({ value: data, formApi }) => {
+      onAddTimer(data.badgeNumber, data.minutes);
+      formApi.reset();
+      setOpen(false);
+    },
+  });
 
-    const minutes = selectedPreset || Number.parseInt(customMinutes, 10) || 0;
-    if (minutes <= 0) return;
-
-    onAddTimer(badgeNumber.trim(), minutes);
-
-    // Reset form
-    setBadgeNumber('');
-    setCustomMinutes('');
-    setSelectedPreset(null);
-  };
-
-  const handlePresetClick = (value: number) => {
-    setSelectedPreset(value);
-    setCustomMinutes('');
-  };
-
-  const handleCustomChange = (value: string) => {
-    setCustomMinutes(value);
-    setSelectedPreset(null);
-  };
-
-  if (!isOpen) return null;
+  const { Field } = form;
 
   return (
-    <>
-      {/* Overlay */}
-      <div
-        className="fixed inset-0 bg-black/50 z-40"
-        onClick={onClose}
-        onKeyUp={onClose}
-      />
-
-      {/* Drawer */}
-      <div className="fixed right-0 top-0 h-full w-80 bg-card border-l border-border z-50 shadow-lg">
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button className="flex items-center gap-2">
+          <Plus className="h-4 w-4" />
+          Novo Timer
+        </Button>
+      </SheetTrigger>
+      <SheetContent>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-border">
-            <h2 className="text-lg font-semibold text-foreground">
+          <SheetHeader>
+            <SheetTitle className="text-lg font-semibold text-foreground">
               Novo Timer
-            </h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="h-8 w-8 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+            </SheetTitle>
+            <SheetDescription>Descrição do form</SheetDescription>
+          </SheetHeader>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="flex-1 p-6 space-y-6">
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+
+              await form.handleSubmit();
+            }}
+            className="flex-1 p-6 space-y-6"
+          >
             {/* Badge Number */}
             <div className="space-y-2">
-              <Label htmlFor="badge" className="text-sm font-medium">
-                Número do Crachá
-              </Label>
-              <Input
-                id={badgeId}
-                type="text"
-                placeholder="Ex: 001, A15, etc."
-                value={badgeNumber}
-                onChange={(e) => setBadgeNumber(e.target.value)}
-                className="w-full"
+              <Field
+                name={'badgeNumber'}
+                children={(field) => (
+                  <div>
+                    <Label className="text-sm font-medium">
+                      Número do Crachá
+                    </Label>
+                    <Input
+                      type="text"
+                      placeholder="Ex: 001, A15, etc."
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      className="w-full"
+                    />
+                  </div>
+                )}
               />
             </div>
 
             {/* Time Presets */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">Tempo Pré-definido</Label>
-              <div className="grid grid-cols-1 gap-2">
-                {presetOptions.map((preset) => (
-                  <Button
-                    key={preset.value}
-                    type="button"
-                    variant={
-                      selectedPreset === preset.value ? 'default' : 'outline'
-                    }
-                    onClick={() => handlePresetClick(preset.value)}
-                    className="w-full justify-start"
-                  >
-                    {preset.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            {/* Custom Time */}
-            <div className="space-y-2">
-              <Label htmlFor="custom" className="text-sm font-medium">
-                Tempo Personalizado (minutos)
-              </Label>
-              <Input
-                id={customTimer}
-                type="number"
-                placeholder="Ex: 45, 90, etc."
-                value={customMinutes}
-                onChange={(e) => handleCustomChange(e.target.value)}
-                min="1"
-                className="w-full"
-              />
-            </div>
+            <Field
+              name="minutes"
+              children={(field) => (
+                <>
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium">
+                      Tempo Pré-definido
+                    </Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {presetOptions.map((preset) => (
+                        <Button
+                          key={preset.value}
+                          type="button"
+                          variant={
+                            field.state.value === preset.value
+                              ? 'default'
+                              : 'outline'
+                          }
+                          onClick={() =>
+                            field.form.setFieldValue('minutes', preset.value)
+                          }
+                          className="w-full justify-start"
+                        >
+                          {preset.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="custom" className="text-sm font-medium">
+                      Tempo Personalizado (minutos)
+                    </Label>
+                    <Input
+                      id={customTimer}
+                      type="number"
+                      placeholder="Ex: 45, 90, etc."
+                      value={field.state.value}
+                      onChange={(e) =>
+                        field.handleChange(e.target.valueAsNumber)
+                      }
+                      onBlur={field.handleBlur}
+                      min="1"
+                      className="w-full"
+                    />
+                  </div>
+                </>
+              )}
+            />
 
             {/* Submit Button */}
+
             <Button
               type="submit"
               className="w-full"
-              disabled={
-                !badgeNumber.trim() || (!selectedPreset && !customMinutes)
-              }
+              // disabled={
+              //   !form.state.values.badgeNumber || !form.state.values.minutes
+              // }
             >
               Criar Timer
             </Button>
           </form>
         </div>
-      </div>
-    </>
+      </SheetContent>
+    </Sheet>
   );
 }

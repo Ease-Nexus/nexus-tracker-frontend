@@ -240,8 +240,7 @@ export function useTimerManager() {
     const totalTimeHours = Math.round((totalTimeMinutes / 60) * 10) / 10; // Round to 1 decimal
     const averageTime =
       totalTimers > 0 ? Math.round(totalTimeMinutes / totalTimers) : 0;
-
-    return {
+    const stats = {
       active: activeTimers,
       paused: pausedTimers,
       stopped: stoppedTimers,
@@ -250,6 +249,8 @@ export function useTimerManager() {
       totalTimeHours,
       averageTime,
     };
+
+    return stats;
   }, [timers]);
 
   const getCompletedTimers = useCallback((): CompletedTimer[] => {
