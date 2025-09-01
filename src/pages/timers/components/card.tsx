@@ -1,19 +1,11 @@
 'use client';
 
-import {
-  Clock,
-  Info,
-  Pause,
-  Play,
-  RotateCcw,
-  Square,
-  TimerIcon,
-  Trash2,
-} from 'lucide-react';
+import { Icon } from '@iconify/react/dist/iconify.js';
+import { Info, Pause, Play, RotateCcw, Square, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { Timer } from '@/types';
 import { TimerDetailsModal } from './details-modal';
@@ -45,30 +37,14 @@ export function TimerCard({ timer, onUpdate, onDelete }: TimerCardProps) {
     return 'text-foreground';
   };
 
-  const getStatusBadge = () => {
-    if (timer.status === 'running')
-      return {
-        variant: 'default' as const,
-        text: 'Ativo',
-        color: 'bg-green-500',
-      };
-    if (timer.status === 'paused')
-      return {
-        variant: 'secondary' as const,
-        text: 'Pausado',
-        color: 'bg-yellow-500',
-      };
+  const getProgressBarColor = () => {
     if (timer.remainingTime === 0)
-      return {
-        variant: 'destructive' as const,
-        text: 'Finalizado',
-        color: 'bg-red-500',
-      };
-    return {
-      variant: 'outline' as const,
-      text: 'Parado',
-      color: 'bg-gray-500',
-    };
+      return 'bg-gradient-to-r from-red-400 to-red-600';
+    if (timer.status === 'running')
+      return 'bg-gradient-to-r from-green-400 to-emerald-500';
+    if (timer.status === 'paused')
+      return 'bg-gradient-to-r from-yellow-400 to-amber-500';
+    return 'bg-gradient-to-r from-gray-400 to-gray-500';
   };
 
   const handlePlay = () => {
@@ -107,126 +83,104 @@ export function TimerCard({ timer, onUpdate, onDelete }: TimerCardProps) {
     ((timer.totalMinutes * 60 - timer.remainingTime) /
       (timer.totalMinutes * 60)) *
     100;
-  const statusBadge = getStatusBadge();
 
   return (
     <>
       <Card
         className={cn(
-          'relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] bg-card border',
+          'relative overflow-hidden transition-all duration-300 hover:shadow-lg bg-card border',
         )}
       >
-        <CardHeader className="pb-2 pt-3">
-          <div className="flex items-center justify-between">
+        <CardContent className="px-4 py-0">
+          <div className="flex items-start justify-between mb-3">
             <Badge
-              variant="secondary"
-              className="font-mono text-xs px-2 py-0.5 bg-muted/50 backdrop-blur-sm border shadow-sm"
+              variant="outline"
+              className="font-mono text-xs px-2 py-0.5 bg-muted/50 backdrop-blur-sm border shadow-sm flex items-center gap-2 "
             >
-              <TimerIcon className="h-2.5 w-2.5 mr-1" />#{timer.badgeNumber}
+              <Icon icon="meteor-icons:credit-card" />
+              {timer.badgeNumber}
             </Badge>
-            <Badge
-              variant={statusBadge.variant}
-              className="capitalize px-2 py-0.5 text-xs font-medium shadow-sm"
-            >
-              <div
-                className={cn(
-                  'w-1.5 h-1.5 rounded-full mr-1.5',
-                  statusBadge.color,
-                )}
-              />
-              {statusBadge.text}
-            </Badge>
-          </div>
-        </CardHeader>
 
-        <CardContent className="space-y-3 pb-2">
-          <div className="text-center space-y-1.5">
-            <div className="flex items-center justify-center gap-1.5">
-              <Clock className={cn('h-4 w-4', getTimeColor())} />
-              <div
-                className={cn(
-                  'text-2xl font-bold font-mono tracking-tight',
-                  getTimeColor(),
-                )}
+            <div className="flex items-center gap-1.5">
+              <Button
+                size="sm"
+                variant={timer.status === 'running' ? 'secondary' : 'default'}
+                onClick={handlePlay}
+                disabled={timer.remainingTime === 0}
+                className="rounded-sm h-6 w-6 p-0 shadow-sm hover:shadow-md transition-all duration-200"
               >
-                {formatTime(timer.remainingTime)}
-              </div>
-            </div>
-            <div className="text-xs text-muted-foreground bg-muted/30 rounded-full px-2 py-0.5 backdrop-blur-sm border">
-              Total: {timer.totalMinutes} min
-              {timer.history.length > 0 && (
-                <span className="ml-1.5">
-                  • {timer.history.length} sessõe
-                  {timer.history.length !== 1 ? 's' : ''}
-                </span>
-              )}
+                {timer.status === 'running' ? (
+                  <Pause className="h-2.5 w-2.5" />
+                ) : (
+                  <Play className="h-2.5 w-2.5" />
+                )}
+              </Button>
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleStop}
+                disabled={timer.status === 'stopped'}
+                className="rounded-sm h-6 w-6 p-0 shadow-sm hover:shadow-md transition-all duration-200 bg-transparent"
+              >
+                <Square className="h-2.5 w-2.5" />
+              </Button>
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleReset}
+                disabled={timer.status === 'running'}
+                className="rounded-sm h-6 w-6 p-0 shadow-sm hover:shadow-md transition-all duration-200 bg-transparent"
+              >
+                <RotateCcw className="h-2.5 w-2.5" />
+              </Button>
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setShowDetails(true)}
+                className="rounded-sm h-6 w-6 p-0 shadow-sm hover:shadow-md transition-all duration-200"
+              >
+                <Info className="h-2.5 w-2.5" />
+              </Button>
+
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={handleDelete}
+                className="rounded-sm h-6 w-6 p-0 shadow-sm hover:shadow-md transition-all duration-200"
+              >
+                <Trash2 className="h-2.5 w-2.5" />
+              </Button>
             </div>
           </div>
 
-          <div className="flex items-center justify-center gap-1">
-            <Button
-              size="sm"
-              variant={timer.status === 'running' ? 'secondary' : 'default'}
-              onClick={handlePlay}
-              disabled={timer.remainingTime === 0}
-              className="h-7 w-7 p-0 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
-            >
-              {timer.status === 'running' ? (
-                <Pause className="h-3 w-3" />
-              ) : (
-                <Play className="h-3 w-3" />
+          <div className="flex items-center justify-between">
+            <div
+              className={cn(
+                'text-2xl font-bold font-mono tracking-tight',
+                getTimeColor(),
               )}
-            </Button>
-
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleStop}
-              disabled={timer.status === 'stopped'}
-              className="h-7 w-7 p-0 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105 bg-transparent"
             >
-              <Square className="h-3 w-3" />
-            </Button>
+              {formatTime(timer.remainingTime)}
+            </div>
 
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleReset}
-              disabled={timer.status === 'running'}
-              className="h-7 w-7 p-0 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105 bg-transparent"
-            >
-              <RotateCcw className="h-3 w-3" />
-            </Button>
-
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setShowDetails(true)}
-              className="h-7 w-7 p-0 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
-            >
-              <Info className="h-3 w-3" />
-            </Button>
-
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={handleDelete}
-              className="h-7 w-7 p-0 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
-            >
-              <Trash2 className="h-3 w-3" />
-            </Button>
+            {timer.history.length > 0 && (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                {/* <Users className="h-3 w-3" /> */}
+                <Icon icon="bi:bar-chart-steps" />
+                <span>{timer.history.length}</span>
+              </div>
+            )}
           </div>
 
           <div className="absolute bottom-1 left-3 right-3">
-            <div className="h-1.5 bg-muted rounded-full shadow-inner">
+            <div className="h-1 bg-muted rounded-full shadow-inner">
               <div
                 className={cn(
                   'h-full rounded-full transition-all duration-1000 ease-out relative shadow-sm',
-                  timer.status === 'running'
-                    ? 'bg-gradient-to-r from-green-400 to-emerald-500'
-                    : timer.status === 'paused'
-                      ? 'bg-gradient-to-r from-yellow-400 to-amber-500'
-                      : 'bg-gradient-to-r from-blue-400 to-indigo-500',
+                  getProgressBarColor(),
                 )}
                 style={{ width: `${progressPercentage}%` }}
               >
