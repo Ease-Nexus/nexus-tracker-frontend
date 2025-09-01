@@ -1,3 +1,4 @@
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { Timer } from '@/types';
 import { TimerCard } from './card';
 
@@ -42,18 +43,66 @@ export function Dashboard({
     );
   }
 
+  const runningTimers = timers.filter((timer) => timer.status === 'running');
+  const finishedTimers = timers.filter(
+    (timer) => timer.status === 'stopped' && timer.remainingTime === 0,
+  );
+
   return (
-    <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-        {timers.map((timer) => (
-          <TimerCard
-            key={timer.id}
-            timer={timer}
-            onUpdate={onUpdateTimer}
-            onDelete={onDeleteTimer}
-          />
-        ))}
-      </div>
-    </div>
+    <Tabs className="gap-4">
+      <TabsList className="">
+        <TabsTrigger className="px-4" value="all">
+          Todos
+        </TabsTrigger>
+        <TabsTrigger className="px-4" value="running">
+          Em execução
+        </TabsTrigger>
+        <TabsTrigger className="px-4" value="finished">
+          Finalizados
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value="all">
+        <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {timers.map((timer) => (
+              <TimerCard
+                key={timer.id}
+                timer={timer}
+                onUpdate={onUpdateTimer}
+                onDelete={onDeleteTimer}
+              />
+            ))}
+          </div>
+        </div>
+      </TabsContent>
+      <TabsContent value="running">
+        <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {runningTimers.map((timer) => (
+              <TimerCard
+                key={timer.id}
+                timer={timer}
+                onUpdate={onUpdateTimer}
+                onDelete={onDeleteTimer}
+              />
+            ))}
+          </div>
+        </div>
+      </TabsContent>
+      <TabsContent value="finished">
+        <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {finishedTimers.map((timer) => (
+              <TimerCard
+                key={timer.id}
+                timer={timer}
+                onUpdate={onUpdateTimer}
+                onDelete={onDeleteTimer}
+              />
+            ))}
+          </div>
+        </div>
+      </TabsContent>
+    </Tabs>
   );
 }
