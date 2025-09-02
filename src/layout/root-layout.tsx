@@ -27,7 +27,7 @@ export const RootLayout = ({ children }: BaseProviderProps) => {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">Nexus Tracker</BreadcrumbLink>
+                  <BreadcrumbLink href="#">C.B.D.G Timer</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>

@@ -197,7 +197,7 @@ export function TimerCard({ timer, onUpdate, onDelete }: TimerCardProps) {
               {playButton}
               {stopButton}
               {resetButton}
-              {/* {infoButton} */}
+              {infoButton}
               {deleteButton}
             </div>
           </div>
@@ -212,15 +212,13 @@ export function TimerCard({ timer, onUpdate, onDelete }: TimerCardProps) {
               {formatTime(timer.remainingTime)}
             </div>
 
-            {
-              // timer.history.length > 0 && (
-              //   <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              //     {/* <Users className="h-3 w-3" /> */}
-              //     <Icon icon="bi:bar-chart-steps" />
-              //     <span>{timer.history.length}</span>
-              //   </div>
-              // )
-            }
+            {timer.history.length > 0 && (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                {/* <Users className="h-3 w-3" /> */}
+                <Icon icon="bi:bar-chart-steps" />
+                <span>{timer.history.length}</span>
+              </div>
+            )}
           </div>
 
           <div className="absolute bottom-1 left-3 right-3">

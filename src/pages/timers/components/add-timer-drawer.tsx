@@ -24,9 +24,6 @@ export function AddTimerDrawer({ onAddTimer }: AddTimerDrawerProps) {
     { label: '30 min', value: 30 },
     { label: '1 hora', value: 60 },
     { label: '2 horas', value: 120 },
-    { label: '4 horas', value: 240 },
-    { label: '8 horas', value: 480 },
-    { label: '12 horas', value: 720 },
   ];
   const customTimer = useId();
 
