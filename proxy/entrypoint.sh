@@ -3,7 +3,7 @@
 set -e
 
 echo "🛠️ Substituindo variáveis no nginx.conf..."
-envsubst '${FRONTEND_DOMAIN} ${BACKEND_HOST} ${BACKEND_PORT}' \
+envsubst '${FRONTEND_DOMAIN}' \
   < /nginx.template.conf > /etc/nginx/conf.d/default.conf
 
 echo "🚀 Iniciando Nginx..."
