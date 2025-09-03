@@ -35,6 +35,6 @@ jobs:
           docker push ${{ vars.DOCKER_REGISTRY }}/ease-nexus-frontend:latest
 
 
-      # - name: Trigger Proxy Refresh (optional)
-      #   run: |
-      #     curl https://lunalabs.com.br/api/deploy/compose/fjDOWSSZHXxvWkRjRzkjF
+      - name: Trigger Proxy Refresh (optional)
+        run: |
+          curl https://lunalabs.com.br/api/deploy/compose/cI08WBSoRFnyWubeWGnwW
