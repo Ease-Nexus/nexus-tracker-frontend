@@ -25,7 +25,7 @@ jobs:
 
       - name: Build and push image
         run: |
-          docker build -t ${{ vars.DOCKER_REGISTRY }}/ease-nexus-frontend:${{ steps.tag.outputs.tag }} .
+          docker build --no-cache -t ${{ vars.DOCKER_REGISTRY }}/ease-nexus-frontend:${{ steps.tag.outputs.tag }} .
 
           docker tag ${{ vars.DOCKER_REGISTRY }}/ease-nexus-frontend:${{ steps.tag.outputs.tag }} ${{ vars.DOCKER_REGISTRY }}/ease-nexus-frontend:latest
 
