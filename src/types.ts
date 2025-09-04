@@ -3,7 +3,7 @@ export interface Timer {
   badgeNumber: string;
   totalMinutes: number;
   remainingTime: number;
-  status: "running" | "paused" | "stopped";
+  status: 'running' | 'paused' | 'stopped' | 'completed';
   createdAt: Date;
   history: TimerBlock[];
 }

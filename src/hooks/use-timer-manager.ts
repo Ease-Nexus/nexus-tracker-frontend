@@ -123,7 +123,7 @@ export function useTimerManager() {
                 return {
                   ...timer,
                   remainingTime: 0,
-                  status: 'stopped' as const,
+                  status: 'completed' as const,
                   history: updatedHistory,
                 };
               }
@@ -140,14 +140,15 @@ export function useTimerManager() {
   }, [saveCompletedTimer]);
 
   const addTimer = useCallback((badgeNumber: string, minutes: number) => {
+    const now = new Date();
     const newTimer: Timer = {
       id: crypto.randomUUID(),
       badgeNumber,
       totalMinutes: minutes,
       remainingTime: minutes * 60,
-      status: 'stopped',
-      createdAt: new Date(),
-      history: [],
+      status: 'running',
+      createdAt: now,
+      history: [{ start: now, elapsed: 0 }],
     };
     setTimers((prev) => [...prev, newTimer]);
   }, []);
@@ -224,13 +225,19 @@ export function useTimerManager() {
     );
   }, []);
 
+  const clearCompletedTimers = useCallback(() => {
+    setTimers((prev) => prev.filter((timer) => timer.status !== 'completed'));
+  }, []);
+
   const getTimerStats = useCallback(() => {
     const activeTimers = timers.filter((t) => t.status === 'running').length;
     const pausedTimers = timers.filter((t) => t.status === 'paused').length;
     const stoppedTimers = timers.filter(
       (t) => t.status === 'stopped' && t.remainingTime > 0,
     ).length;
-    const completedTimers = timers.filter((t) => t.remainingTime === 0).length;
+    const completedTimers = timers.filter(
+      (t) => t.status === 'completed' && t.remainingTime === 0,
+    ).length;
     const totalTimers = timers.length;
 
     const totalTimeMinutes = timers.reduce(
@@ -279,6 +286,7 @@ export function useTimerManager() {
     updateTimer,
     deleteTimer,
     resetTimer,
+    clearCompletedTimers,
     getTimerStats,
     getCompletedTimers,
   };

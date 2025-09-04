@@ -12,6 +12,7 @@ import {
 
 interface Props {
   children?: React.ReactNode;
+  body?: React.ReactNode;
   dialog: {
     title: string;
     description?: string;
@@ -30,6 +31,7 @@ interface Props {
 
 export const Dialog = ({
   children,
+  body,
   dialog: { title, description, actions },
 }: Props) => {
   return (
@@ -40,6 +42,7 @@ export const Dialog = ({
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
+        {body}
         <AlertDialogFooter>
           <AlertDialogAction onClick={actions?.continue.onClick}>
             {actions?.continue.label ?? 'Continue'}

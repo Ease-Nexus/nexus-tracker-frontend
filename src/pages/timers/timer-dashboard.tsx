@@ -26,6 +26,7 @@ export default function TimerDashboard() {
     addTimer,
     updateTimer,
     deleteTimer,
+    clearCompletedTimers,
     getTimerStats,
   } = useTimerManager();
 
@@ -71,6 +72,8 @@ export default function TimerDashboard() {
         timers={timers}
         onUpdateTimer={updateTimer}
         onDeleteTimer={deleteTimer}
+        getTimerStats={getTimerStats}
+        clearCompletedTimers={clearCompletedTimers}
       />
     </div>
   );

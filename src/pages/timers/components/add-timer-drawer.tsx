@@ -40,7 +40,7 @@ export function AddTimerDrawer({ onAddTimer }: AddTimerDrawerProps) {
     },
     defaultValues: {
       badgeNumber: '',
-      minutes: 0,
+      minutes: presetOptions[0].value,
     },
     onSubmitInvalid: ({ value }) => {
       console.log('invalid', { value });
