@@ -34,6 +34,17 @@ jobs:
           docker push ${{ vars.DOCKER_REGISTRY }}/ease-nexus-front:${{ steps.tag.outputs.tag }}
           docker push ${{ vars.DOCKER_REGISTRY }}/ease-nexus-front:latest
 
+      - name: Update image tag in .env file
+        run: |
+          curl -X 'POST' \
+            'https://lunalabs.com.br/api/compose.update' \
+            -H 'accept: application/json' \
+            -H 'Content-Type: application/json' \
+            -H 'x-api-key: ${{ secrets.DOKPLOY_API_KEY }}' \
+            -d '{
+            "composeId": "wO-8IxjPXZGWIm1yeHGSG",  
+            "env": "FRONTEND_DOMAIN=cbdg.demo.lunalabs.com.br\nIMAGE_TAG=${{ steps.tag.outputs.tag }}"
+          }'
 
       - name: Trigger Proxy Refresh (optional)
         run: |
