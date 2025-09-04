@@ -114,7 +114,9 @@ export function Dashboard({
               className="flex items-center gap-2 border-border/50 hover:border-destructive/50 hover:bg-destructive/5 hover:text-destructive transition-all duration-200 text-muted-foreground hover:shadow-sm bg-transparent cursor-pointer"
             >
               <Trash2 className="h-3 w-3" />
-              <span className="text-xs font-medium">Limpar finalizados</span>
+              <span className="text-xs font-medium">
+                Limpar timers finalizados
+              </span>
               <div className="bg-red-800 bg-opacity-50 px-1.5 py-0.5 rounded-full text-xs font-bold">
                 {completed}
               </div>
