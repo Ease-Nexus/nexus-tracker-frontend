@@ -7,8 +7,8 @@ import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import type { Timer } from '@/types';
+import type { Timer } from '@/domain';
+import { cn, formatTime } from '@/lib/utils';
 import { TimerDetailsModal } from './details-modal';
 import { Dialog } from './dialog';
 
@@ -21,52 +21,42 @@ interface TimerCardProps {
 export function TimerCard({ timer, onUpdate, onDelete }: TimerCardProps) {
   const [showDetails, setShowDetails] = useState(false);
 
-  const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-
-    if (hours > 0) {
-      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    }
-    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
+  const completed = timer.elapsed >= timer.duration;
 
   const getTimeColor = () => {
-    if (timer.remainingTime === 0) return 'text-red-500 animate-pulse';
-    if (timer.remainingTime <= 60) return 'text-red-500'; // 1 min
-    if (timer.remainingTime <= 300) return 'text-yellow-600'; // 5 min
+    if (completed) return 'text-red-500 animate-pulse';
+    if (timer.duration - timer.elapsed <= 60 * 1000) return 'text-red-500'; // 1 min
+    if (timer.duration - timer.elapsed <= 300 * 1000) return 'text-yellow-600'; // 5 min
     return 'text-foreground';
   };
 
   const getProgressBarColor = () => {
-    if (timer.remainingTime === 0)
-      return 'bg-gradient-to-r from-red-400 to-red-600';
-    if (timer.status === 'running')
+    if (completed) return 'bg-gradient-to-r from-red-400 to-red-600';
+    if (timer.status === 'RUNNING')
       return 'bg-gradient-to-r from-green-400 to-emerald-500';
-    if (timer.status === 'paused')
+    if (timer.status === 'PAUSED')
       return 'bg-gradient-to-r from-yellow-400 to-amber-500';
     return 'bg-gradient-to-r from-gray-400 to-gray-500';
   };
 
   const handlePlay = () => {
-    if (timer.status === 'running') {
-      onUpdate(timer.id, { status: 'paused' });
+    if (timer.status === 'RUNNING') {
+      // onUpdate(timer.id, { status: 'paused' });
     } else {
-      onUpdate(timer.id, { status: 'running' });
+      // onUpdate(timer.id, { status: 'running' });
     }
   };
 
   const handleStop = () => {
-    onUpdate(timer.id, { status: 'stopped' });
+    // onUpdate(timer.id, { status: 'stopped' });
   };
 
   const handleReset = () => {
-    onUpdate(timer.id, {
-      remainingTime: timer.totalMinutes * 60,
-      status: 'stopped',
-      history: [],
-    });
+    // onUpdate(timer.id, {
+    //   remainingTime: timer.totalMinutes * 60,
+    //   status: 'stopped',
+    //   history: [],
+    // });
 
     toast.info('Timer restaurado');
   };
@@ -79,12 +69,12 @@ export function TimerCard({ timer, onUpdate, onDelete }: TimerCardProps) {
   const playButton = (
     <Button
       size="sm"
-      variant={timer.status === 'running' ? 'secondary' : 'default'}
+      variant={timer.status === 'RUNNING' ? 'secondary' : 'default'}
       onClick={handlePlay}
-      disabled={timer.remainingTime === 0}
+      disabled={completed}
       className="rounded-sm h-6 w-6 p-0 shadow-sm hover:shadow-md transition-all duration-200"
     >
-      {timer.status === 'running' ? (
+      {timer.status === 'RUNNING' ? (
         <Pause className="h-2.5 w-2.5" />
       ) : (
         <Play className="h-2.5 w-2.5" />
@@ -97,7 +87,7 @@ export function TimerCard({ timer, onUpdate, onDelete }: TimerCardProps) {
       size="sm"
       variant="outline"
       onClick={handleStop}
-      disabled={timer.status === 'stopped'}
+      disabled={timer.status === 'CANCELED'}
       className="rounded-sm h-6 w-6 p-0 shadow-sm hover:shadow-md transition-all duration-200 bg-transparent"
     >
       <Square className="h-2.5 w-2.5" />
@@ -125,7 +115,7 @@ export function TimerCard({ timer, onUpdate, onDelete }: TimerCardProps) {
       <Button
         size="sm"
         variant="outline"
-        disabled={timer.status === 'running'}
+        disabled={timer.status === 'RUNNING'}
         className="rounded-sm h-6 w-6 p-0 shadow-sm hover:shadow-md transition-all duration-200 bg-transparent"
       >
         <RotateCcw className="h-2.5 w-2.5" />
@@ -172,9 +162,7 @@ export function TimerCard({ timer, onUpdate, onDelete }: TimerCardProps) {
   );
 
   const progressPercentage =
-    ((timer.totalMinutes * 60 - timer.remainingTime) /
-      (timer.totalMinutes * 60)) *
-    100;
+    ((timer.duration - timer.elapsed) / timer.duration) * 100;
 
   return (
     <>
@@ -190,7 +178,7 @@ export function TimerCard({ timer, onUpdate, onDelete }: TimerCardProps) {
               className="font-mono text-xs px-2 py-0.5 bg-muted/50 backdrop-blur-sm border shadow-sm flex items-center gap-2 "
             >
               <Icon icon="meteor-icons:credit-card" />
-              {timer.badgeNumber}
+              {timer.badge}
             </Badge>
 
             <div className="flex items-center gap-1.5">
@@ -209,7 +197,7 @@ export function TimerCard({ timer, onUpdate, onDelete }: TimerCardProps) {
                 getTimeColor(),
               )}
             >
-              {formatTime(timer.remainingTime)}
+              {formatTime(timer.duration - timer.elapsed)}
             </div>
 
             {timer.history.length > 0 && (
@@ -230,7 +218,7 @@ export function TimerCard({ timer, onUpdate, onDelete }: TimerCardProps) {
                 )}
                 style={{ width: `${progressPercentage}%` }}
               >
-                {timer.status === 'running' && (
+                {timer.status === 'RUNNING' && (
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse rounded-full" />
                 )}
               </div>

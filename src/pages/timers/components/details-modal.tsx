@@ -9,7 +9,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { Timer } from '@/types';
+import type { Timer } from '@/domain';
+import { formatTime } from '@/lib/utils';
 
 interface TimerDetailsModalProps {
   timer: Timer | null;
@@ -24,18 +25,12 @@ export function TimerDetailsModal({
 }: TimerDetailsModalProps) {
   if (!timer) return null;
 
-  const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-
-    if (hours > 0) {
-      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  const formatDateTime = (date: Date | string) => {
+    if (!date) return '--';
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    if (Number.isNaN(dateObj.getTime())) {
+      return '--';
     }
-    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const formatDateTime = (date: Date) => {
     return new Intl.DateTimeFormat('pt-BR', {
       day: '2-digit',
       month: '2-digit',
@@ -43,15 +38,15 @@ export function TimerDetailsModal({
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-    }).format(date);
+    }).format(dateObj);
   };
 
   const totalElapsed = timer.history.reduce(
     (sum, block) => sum + block.elapsed,
     0,
   );
-  const remainingMinutes = Math.ceil(timer.remainingTime / 60);
-  const totalMinutes = timer.totalMinutes;
+  const remainingMinutes = Math.ceil((timer.duration - timer.elapsed) / 60);
+  const totalMinutes = timer.duration / 60;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -73,18 +68,18 @@ export function TimerDetailsModal({
                 variant="secondary"
                 className="font-mono text-base px-3 py-1"
               >
-                #{timer.badgeNumber}
+                #{timer.badge}
               </Badge>
             </div>
             <div className="space-y-2">
               <div className="text-sm text-muted-foreground">Status</div>
               <Badge
-                variant={timer.status === 'running' ? 'default' : 'outline'}
+                variant={timer.status === 'RUNNING' ? 'default' : 'outline'}
                 className="capitalize text-base px-3 py-1"
               >
-                {timer.status === 'running'
+                {timer.status === 'RUNNING'
                   ? 'Ativo'
-                  : timer.status === 'paused'
+                  : timer.status === 'PAUSED'
                     ? 'Pausado'
                     : 'Parado'}
               </Badge>
@@ -117,7 +112,7 @@ export function TimerDetailsModal({
           <div className="space-y-2">
             <div className="text-sm text-muted-foreground">Criado em</div>
             <div className="font-mono text-sm">
-              {formatDateTime(timer.createdAt)}
+              {timer.startedAt && formatDateTime(timer.startedAt)}
             </div>
           </div>
 
@@ -163,23 +158,23 @@ export function TimerDetailsModal({
                             Início
                           </div>
                           <div className="font-mono">
-                            {formatDateTime(block.start)}
+                            {formatDateTime(block.startedAt)}
                           </div>
                         </div>
-                        {block.end && (
+                        {block.endedAt && (
                           <div>
                             <div className="text-muted-foreground flex items-center gap-1">
                               <Pause className="h-3 w-3" />
                               Fim
                             </div>
                             <div className="font-mono">
-                              {formatDateTime(block.end)}
+                              {formatDateTime(block.endedAt)}
                             </div>
                           </div>
                         )}
                       </div>
 
-                      {!block.end && (
+                      {!block.endedAt && (
                         <div className="text-sm text-blue-600 font-medium">
                           ⏳ Bloco em andamento
                         </div>

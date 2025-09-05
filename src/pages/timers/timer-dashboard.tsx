@@ -1,41 +1,54 @@
-import { useTimerManager } from '@/hooks/use-timer-manager';
+import type { Timer } from '@/domain';
+import { useTimersEvents } from '@/hooks/use-timers-events';
+import {
+  useAddTimerMutation,
+  useClearCompletedTimersMutation,
+  useDeleteTimerMutation,
+  useTimersQuery,
+  useUpdateTimerMutation,
+} from '@/infrastructure/api/query';
 import { AddTimerDrawer } from '@/pages/timers/components/add-timer-drawer';
 import { Counters } from './components';
 import { Dashboard } from './components/dashboard';
 
-export interface Timer {
-  id: string;
-  badgeNumber: string;
-  totalMinutes: number;
-  remainingTime: number;
-  status: 'running' | 'paused' | 'stopped';
-  createdAt: Date;
-  history: TimerBlock[];
-}
-
-export interface TimerBlock {
-  start: Date;
-  end?: Date;
-  elapsed: number;
-}
-
 export default function TimerDashboard() {
-  const {
-    timers,
-    isLoaded,
-    addTimer,
-    updateTimer,
-    deleteTimer,
-    clearCompletedTimers,
-    getTimerStats,
-  } = useTimerManager();
+  const { data: timers, isLoading: isLoadingTimers } = useTimersQuery();
+  const { mutate: addTimer } = useAddTimerMutation();
+  const { mutate: updateTimer } = useUpdateTimerMutation();
+  const { mutate: deleteTimer } = useDeleteTimerMutation();
+  const { mutate: clearCompletedTimers } = useClearCompletedTimersMutation();
 
-  const handleAddTimer = (badgeNumber: string, minutes: number) => {
-    console.log(badgeNumber, minutes);
-    addTimer(badgeNumber, minutes);
+  useTimersEvents();
+
+  const getTimerStats = (timers: Timer[]) => {
+    const active = timers.filter((t) => t.status === 'RUNNING').length;
+    const paused = timers.filter((t) => t.status === 'PAUSED').length;
+    const stopped = timers.filter((t) =>
+      ['CREATED', 'CANCELED'].includes(t.status),
+    ).length;
+    const completed = timers.filter((t) => t.status === 'COMPLETED').length;
+    const total = timers.length;
+
+    const totalTimeMinutes = timers.reduce(
+      (sum, timer) => sum + timer.duration / 60,
+      0,
+    );
+    const totalTimeHours = Math.round((totalTimeMinutes / 60) * 10) / 10; // Round to 1 decimal
+    const averageTime = total > 0 ? Math.round(totalTimeMinutes / total) : 0;
+    const stats = {
+      active,
+      paused,
+      stopped,
+      completed,
+      total,
+      totalTimeHours,
+      averageTime,
+    };
+
+    return stats;
   };
 
-  if (!isLoaded) {
+  if (isLoadingTimers) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -45,6 +58,16 @@ export default function TimerDashboard() {
       </div>
     );
   }
+
+  if (!timers) {
+    return <div>No Data</div>;
+  }
+
+  const handleAddTimer = (badgeNumber: string, minutes: number) => {
+    addTimer({ badgeNumber, minutes });
+  };
+
+  const timerStats = getTimerStats(timers);
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4">
@@ -63,16 +86,16 @@ export default function TimerDashboard() {
             <AddTimerDrawer onAddTimer={handleAddTimer} />
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 w-full">
-            <Counters getTimerStats={getTimerStats} />
+            <Counters getTimerStats={() => timerStats} />
           </div>
         </div>
       </header>
 
       <Dashboard
         timers={timers}
-        onUpdateTimer={updateTimer}
-        onDeleteTimer={deleteTimer}
-        getTimerStats={getTimerStats}
+        onUpdateTimer={(id, updates) => updateTimer({ id, updates })}
+        onDeleteTimer={(id) => deleteTimer(id)}
+        getTimerStats={() => timerStats}
         clearCompletedTimers={clearCompletedTimers}
       />
     </div>

@@ -1,7 +1,7 @@
 import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { Timer } from '@/types';
+import type { Timer } from '@/domain';
 import { TimerCard } from './card';
 import { Dialog } from './dialog';
 
@@ -59,12 +59,14 @@ export function Dashboard({
   }
   const { completed } = getTimerStats();
 
-  const runningTimers = timers.filter((timer) => timer.status === 'running');
+  const runningTimers = timers.filter((timer) => timer.status === 'RUNNING');
   const completedTimers = timers.filter(
-    (timer) => timer.status === 'completed' && timer.remainingTime === 0,
+    (timer) =>
+      ['COMPLETED', 'CANCELLED'].includes(timer.status) &&
+      timer.elapsed >= timer.duration,
   );
-  const stoppedTimers = timers.filter(
-    (timer) => timer.status === 'stopped' || timer.status === 'paused',
+  const stoppedTimers = timers.filter((timer) =>
+    ['PAUSED'].includes(timer.status),
   );
 
   return (
